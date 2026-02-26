@@ -1,15 +1,12 @@
-// --- STATE ---
 let reports = [];
 let nextId = 1;
 
-// --- DOM ELEMENTS ---
 const form = document.getElementById("createForm");
 const tbody = document.getElementById("itemsTableBody");
 const resetBtn = document.getElementById("resetBtn");
 
-// --- INITIALIZATION ---
 form.addEventListener("submit", (event) => {
-  event.preventDefault(); // Зупиняємо перезавантаження сторінки
+  event.preventDefault();
   
   const dto = readForm();
   const isValid = validate(dto);
@@ -27,7 +24,6 @@ resetBtn.addEventListener("click", () => {
   clearAllErrors();
 });
 
-// Делегування подій для таблиці (видалення)
 tbody.addEventListener("click", (event) => {
   if (event.target.classList.contains("delete-btn")) {
     const id = Number(event.target.dataset.id);
@@ -36,9 +32,7 @@ tbody.addEventListener("click", (event) => {
   }
 });
 
-// --- LOGIC FUNCTIONS ---
 
-// Зчитування даних з форми в об'єкт DTO
 function readForm() {
   return {
     title: document.getElementById("titleInput").value.trim(),
@@ -49,7 +43,6 @@ function readForm() {
   };
 }
 
-// Валідація даних
 function validate(dto) {
   clearAllErrors();
   let isValid = true;
@@ -80,7 +73,6 @@ function validate(dto) {
   return isValid;
 }
 
-// Додавання нового запису
 function addReport(dto) {
   const newReport = {
     id: nextId++,
@@ -93,12 +85,10 @@ function addReport(dto) {
   reports.push(newReport);
 }
 
-// Видалення запису за ID
 function deleteReport(id) {
   reports = reports.filter(report => report.id !== id);
 }
 
-// Відображення таблиці
 function renderTable() {
   const rowsHtml = reports.map((item, index) => `
     <tr>
@@ -116,7 +106,6 @@ function renderTable() {
   tbody.innerHTML = rowsHtml;
 }
 
-// --- UI HELPERS ---
 
 function showError(inputId, errorId, message) {
   document.getElementById(inputId).classList.add("invalid");
@@ -135,3 +124,4 @@ function clearAllErrors() {
   clearError("reporterInput", "reporterError");
   clearError("descInput", "descError");
 }
+
