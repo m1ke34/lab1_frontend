@@ -1,9 +1,17 @@
-let reports = [];
-let nextId = 1;
+let reports = [
+  { id: 1, title: "SQL Injection", severity: "High", status: "Open", reporter: "Олексій", description: "Знайдено в формі логіну" },
+  { id: 2, title: "XSS Vulnerability", severity: "Medium", status: "In Progress", reporter: "Михайло", description: "У полі коментарів" }
+];
+let nextId = 3;
+let editingId = null;
 
 const form = document.getElementById("createForm");
 const tbody = document.getElementById("itemsTableBody");
 const resetBtn = document.getElementById("resetBtn");
+const submitBtn = document.getElementById("submitBtn");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+const formTitle = document.getElementById("formTitle");
+
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -11,24 +19,38 @@ form.addEventListener("submit", (event) => {
   const dto = readForm();
   const isValid = validate(dto);
   
-  if (!isValid) return;
+  if (!isValid) return; 
   
-  addReport(dto);
+  if (editingId) {
+    updateReport(editingId, dto);
+  } else {
+    addReport(dto);
+  }
+  
   renderTable();
-  form.reset(); 
-  clearAllErrors();
+  resetFormState();
 });
 
 resetBtn.addEventListener("click", () => {
-  form.reset();
-  clearAllErrors();
+  resetFormState();
+});
+
+cancelEditBtn.addEventListener("click", () => {
+  resetFormState();
 });
 
 tbody.addEventListener("click", (event) => {
-  if (event.target.classList.contains("delete-btn")) {
-    const id = Number(event.target.dataset.id);
+  const target = event.target;
+  
+  if (target.classList.contains("delete-btn")) {
+    const id = Number(target.dataset.id);
     deleteReport(id);
     renderTable();
+  }
+  
+  if (target.classList.contains("edit-btn")) {
+    const id = Number(target.dataset.id);
+    startEdit(id);
   }
 });
 
@@ -41,6 +63,70 @@ function readForm() {
     reporter: document.getElementById("reporterInput").value.trim(),
     description: document.getElementById("descInput").value.trim()
   };
+}
+
+function addReport(dto) {
+  const newReport = { id: nextId++, ...dto };
+  reports.push(newReport);
+}
+
+function updateReport(id, dto) {
+  const index = reports.findIndex(r => r.id === id);
+  if (index !== -1) {
+    reports[index] = { id, ...dto };
+  }
+}
+
+function deleteReport(id) {
+  reports = reports.filter(report => report.id !== id);
+}
+
+function startEdit(id) {
+  const report = reports.find(r => r.id === id);
+  if (!report) return;
+
+  editingId = id;
+  clearAllErrors();
+
+  document.getElementById("titleInput").value = report.title;
+  document.getElementById("severitySelect").value = report.severity;
+  document.getElementById("statusSelect").value = report.status;
+  document.getElementById("reporterInput").value = report.reporter;
+  document.getElementById("descInput").value = report.description;
+
+  formTitle.innerText = "Редагувати репорт";
+  submitBtn.innerText = "Зберегти зміни";
+  cancelEditBtn.style.display = "inline-block"; 
+  resetBtn.style.display = "none"; 
+}
+
+function resetFormState() {
+  form.reset();
+  clearAllErrors();
+  editingId = null;
+  
+  formTitle.innerText = "Додати репорт";
+  submitBtn.innerText = "Додати репорт";
+  cancelEditBtn.style.display = "none";
+  resetBtn.style.display = "inline-block";
+}
+
+function renderTable() {
+  const rowsHtml = reports.map((item, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td>${item.title}</td>
+      <td>${item.severity}</td>
+      <td>${item.status}</td>
+      <td>${item.reporter}</td>
+      <td>
+        <button type="button" class="edit-btn" data-id="${item.id}" style="background-color: #ffc107; color: black; margin-right: 5px;">Редагувати</button>
+        <button type="button" class="delete-btn" data-id="${item.id}">Видалити</button>
+      </td>
+    </tr>
+  `).join("");
+  
+  tbody.innerHTML = rowsHtml;
 }
 
 function validate(dto) {
@@ -73,40 +159,6 @@ function validate(dto) {
   return isValid;
 }
 
-function addReport(dto) {
-  const newReport = {
-    id: nextId++,
-    title: dto.title,
-    severity: dto.severity,
-    status: dto.status,
-    reporter: dto.reporter,
-    description: dto.description
-  };
-  reports.push(newReport);
-}
-
-function deleteReport(id) {
-  reports = reports.filter(report => report.id !== id);
-}
-
-function renderTable() {
-  const rowsHtml = reports.map((item, index) => `
-    <tr>
-      <td>${index + 1}</td>
-      <td>${item.title}</td>
-      <td>${item.severity}</td>
-      <td>${item.status}</td>
-      <td>${item.reporter}</td>
-      <td>
-        <button type="button" class="delete-btn" data-id="${item.id}">Видалити</button>
-      </td>
-    </tr>
-  `).join("");
-  
-  tbody.innerHTML = rowsHtml;
-}
-
-
 function showError(inputId, errorId, message) {
   document.getElementById(inputId).classList.add("invalid");
   document.getElementById(errorId).innerText = message;
@@ -118,10 +170,11 @@ function clearError(inputId, errorId) {
 }
 
 function clearAllErrors() {
-  clearError("titleInput", "titleError");
-  clearError("severitySelect", "severityError");
-  clearError("statusSelect", "statusError");
-  clearError("reporterInput", "reporterError");
-  clearError("descInput", "descError");
+  const inputs = ["titleInput", "severitySelect", "statusSelect", "reporterInput", "descInput"];
+  const errors = ["titleError", "severityError", "statusError", "reporterError", "descError"];
+  
+  for (let i = 0; i < inputs.length; i++) {
+    clearError(inputs[i], errors[i]);
+  }
 }
-
+document.addEventListener("DOMContentLoaded", renderTable);

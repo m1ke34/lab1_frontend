@@ -14,7 +14,7 @@
   
   <main class="container">
     <section id="create-section" class="form-section">
-      <h2>Додати репорт</h2>
+      <h2 id="formTitle">Додати репорт</h2>
       <form id="createForm">
         
         <div class="field">
@@ -58,8 +58,9 @@
         </div>
 
         <div class="buttons">
-          <button type="submit">Додати репорт</button>
+          <button type="submit" id="submitBtn">Додати репорт</button>
           <button type="button" id="resetBtn">Очистити форму</button>
+          <button type="button" id="cancelEditBtn" style="display:none; background-color: #6c757d; color: white;">Скасувати</button>
         </div>
       </form>
     </section>
