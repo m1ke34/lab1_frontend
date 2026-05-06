@@ -1,0 +1,8 @@
+let users = [{ id: 1, name: "Михайло", email: "m1ke@univ.kiev.ua" }];
+const getAll = () => users;
+const create = (dto) => {
+    const newUser = { id: users.length + 1, ...dto };
+    users.push(newUser);
+    return newUser;
+};
+module.exports = { getAll, create };
