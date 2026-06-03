@@ -1,22 +1,42 @@
 const express = require("express");
-const { initDb } = require("./db/initDb");
-const { errorHandler } = require("./middlewares/errorHandler");
+const cors = require("cors");
+const { ApiError, errorHandler } = require("./middlewares/errorHandler");
+const { logger } = require("./middlewares/logger");
 const reportsRoutes = require("./routes/reports.routes");
 
 const app = express();
-app.use(express.json());
-app.use((req, res, next) => { console.log(`[${req.method}] ${req.url}`); next(); });
 
-app.use("/api/reports", reportsRoutes);
+app.use(express.json());
+app.use(logger);
+
+const allowedOrigins = [
+  "http://localhost:5500", 
+  "http://127.0.0.1:5500", 
+  "http://localhost:5173", 
+  "http://127.0.0.1:5173"
+];
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error("CORS: origin is not allowed"), false);
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+app.options(/(.*)/, cors());
+
+app.use("/api/v1/reports", reportsRoutes);
+
+app.use((req, res, next) => {
+  next(new ApiError(404, "ROUTE_NOT_FOUND", "Такого маршруту не існує"));
+});
 
 app.use(errorHandler);
 
 const PORT = 3000;
-async function bootstrap() {
-    await initDb(); 
-    app.listen(PORT, () => console.log(`Сервер працює: http://localhost:${PORT}`));
-}
-bootstrap().catch(err => {
-    console.error("Помилка запуску:", err);
-    process.exit(1);
+app.listen(PORT, () => {
+  console.log(`Сервер працює: http://localhost:${PORT}`);
+  console.log(`Репорти: http://localhost:${PORT}/api/v1/reports`);
 });
