@@ -44,19 +44,54 @@ async function loadReports() {
 }
 
 function renderTable(items: ReportDto[]) {
-  tbody.innerHTML = items.map((item, index) => `
-    <tr>
-      <td>${index + 1}</td>
-      <td>${item.title}</td>
-      <td>${item.severity}</td>
-      <td>${item.status}</td>
-      <td>${item.userId}</td>
-      <td>
-        <button type="button" class="edit-btn" data-id="${item.id}" style="background-color: #ffc107; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Редагувати</button>
-        <button type="button" class="delete-btn" data-id="${item.id}" style="background-color: #dc3545; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">Видалити</button>
-      </td>
-    </tr>
-  `).join("");
+  tbody.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const tr = document.createElement("tr");
+
+    const tdIndex = document.createElement("td");
+    tdIndex.textContent = String(index + 1);
+
+    const tdTitle = document.createElement("td");
+    tdTitle.textContent = item.title; 
+
+    const tdSeverity = document.createElement("td");
+    tdSeverity.textContent = item.severity;
+
+    const tdStatus = document.createElement("td");
+    tdStatus.textContent = item.status;
+
+    const tdUserId = document.createElement("td");
+    tdUserId.textContent = String(item.userId);
+
+    const tdActions = document.createElement("td");
+    
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "edit-btn";
+    editBtn.setAttribute("data-id", String(item.id));
+    editBtn.style.cssText = "background-color: #ffc107; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; margin-right: 4px;";
+    editBtn.textContent = "Редагувати";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "delete-btn";
+    deleteBtn.setAttribute("data-id", String(item.id));
+    deleteBtn.style.cssText = "background-color: #dc3545; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;";
+    deleteBtn.textContent = "Видалити";
+
+    tdActions.appendChild(editBtn);
+    tdActions.appendChild(deleteBtn);
+
+    tr.appendChild(tdIndex);
+    tr.appendChild(tdTitle);
+    tr.appendChild(tdSeverity);
+    tr.appendChild(tdStatus);
+    tr.appendChild(tdUserId);
+    tr.appendChild(tdActions);
+
+    tbody.appendChild(tr);
+  });
 }
 
 function readForm(): CreateReportDto {
