@@ -3,7 +3,7 @@ import cors from "cors";
 import { ApiError, errorHandler } from "./middlewares/errorHandler";
 import { logger } from "./middlewares/logger";
 import reportsRoutes from "./routes/reports.routes";
-
+import usersRoutes from "./routes/user.routes"; 
 const app = express();
 
 app.use(express.json());
@@ -22,12 +22,14 @@ app.use(cors({
     return cb(new Error("CORS: origin is not allowed"), false);
   },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "X-Demo-UserId"]
 }));
 
 app.options(/(.*)/, cors());
 
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.use("/api/v1/reports", reportsRoutes);
+app.use("/api/v1/users", usersRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(new ApiError(404, "ROUTE_NOT_FOUND", "Такого маршруту не існує"));
@@ -39,4 +41,5 @@ const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Сервер працює: http://localhost:${PORT}`);
   console.log(`Репорти: http://localhost:${PORT}/api/v1/reports`);
+  console.log(`Юзери: http://localhost:${PORT}/api/v1/users`);
 });
